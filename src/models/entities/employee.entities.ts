@@ -1,7 +1,7 @@
-import { ObjectId, Schema, model } from "mongoose";
+import mongoose, { Mongoose, ObjectId, Schema, model } from "mongoose";
 import { EmployeeJobTitle, IEmployee } from "../dtos/employee.dtos";
 
-const EmployeeSchema = new Schema<IEmployee>({
+const EmployeeSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -31,7 +31,7 @@ const EmployeeSchema = new Schema<IEmployee>({
         type: Schema.Types.ObjectId,
         ref: "Company"
     }
-}, { collection: "employees" })
+})
 
 EmployeeSchema.methods.joiValidate = function (obj: any) {
     var Joi = require('joi');
@@ -40,7 +40,6 @@ EmployeeSchema.methods.joiValidate = function (obj: any) {
         email: Joi.types.String().min(5).max(255).required(),
         phone_number: Joi.types.String().min(8).max(16),
         job_title: Joi.string().valid('director', 'manager', 'staff'),
-        company_id: Joi.types.String().required()
     }
     return Joi.validate(obj, schema);
 }

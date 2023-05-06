@@ -138,7 +138,7 @@ app.get("/countries", async (req: Request, res: Response) => {
 })
 
 
-app.use("/", indexRoutes)
+app.use("/api", indexRoutes)
 
 app.post('/companies/:company_id/employees',)
 

@@ -1,10 +1,8 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 import Joi from "joi";
 import { ICompany } from "../dtos/company.dtos";
 
-
-
-const CompanySchema = new Schema<ICompany>({
+const CompanySchema = new Schema({
     company_name: {
         type: String,
         required: true,
@@ -29,11 +27,7 @@ const CompanySchema = new Schema<ICompany>({
         maxlength: 50,
         default: null
     },
-    employees: [{
-        type: Schema.Types.ObjectId,
-        ref: "Employee"
-    }]
-}, { collection: 'companies' })
+})
 
 CompanySchema.methods.joiValidate = function (obj: any) {
     var Joi = require('joi');
@@ -47,7 +41,4 @@ CompanySchema.methods.joiValidate = function (obj: any) {
 
 export const Company = model<ICompany>('Company', CompanySchema);
 
-
-
-// module.exports = mongoose.model('Company', CompanySchema)
 
