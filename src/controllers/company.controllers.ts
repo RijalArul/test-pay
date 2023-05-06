@@ -1,10 +1,7 @@
 import { handleResponse } from "../helpers/response.api";
-import { ICompanyRequest } from "../models/dtos/company.dtos";
 import { Company } from "../models/entities/company.entities";
 import { Request, Response } from "express";
 import { Employee } from "../models/entities/employee.entities";
-import { IEmployee } from "../models/dtos/employee.dtos";
-import mongoose from "mongoose";
 
 class CompanyController {
     static CreateCompany(req: Request, res: Response) {
@@ -75,9 +72,9 @@ class CompanyController {
         })
     }
 
-    static async EmployeesByCompanyID(req: Request, res: Response) {
+    static EmployeesByCompanyID(req: Request, res: Response) {
         const { id } = req.params
-        const companies = await Company.aggregate([
+        Company.aggregate([
             {
                 $match: { $expr: { $eq: ['$_id', { $toObjectId: id }] } }
             },
@@ -90,10 +87,36 @@ class CompanyController {
                     as: "employees"
                 }
             },
-        ])
+        ]).then((company) => {
+            const status = 200
+            handleResponse(res, status, status.toString(), company, "succeess")
+        }).catch((err) => {
+            const status = 500
+            handleResponse(res, status, status.toString(), null, "Internal Server Error")
+        })
 
-        const status = 200
-        handleResponse(res, status, status.toString(), companies, "succeess")
+    }
+
+    static UpdateEmployee(req: Request, res: Response) {
+        const { company_id, employee_id } = req.params
+        const { name, phone_number, job_title, email } = req.body
+        const filter = { "_id": employee_id, "company_id": company_id }
+        const update = {
+            name: name,
+            phone_number: phone_number,
+            job_title: job_title,
+            email: email
+        }
+
+        Employee.findByIdAndUpdate(filter, update, { runValidators: true }).then(() => {
+            Employee.findById(filter).then((employee) => {
+                const status = 200
+                handleResponse(res, status, status.toString(), employee, "Success")
+            })
+        }).catch((err) => {
+            const status = 400
+            handleResponse(res, status, status.toString(), null, err.message)
+        })
     }
 
 }
