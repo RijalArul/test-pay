@@ -2,14 +2,16 @@ import express, { Express, Request, Response } from "express";
 import * as dotenv from 'dotenv'
 import Joi from 'joi';
 import axios from 'axios'
-import endpointsConfig from "./endpoints.config";
 import { connectDB } from "./db/db";
+import { Company } from "./models/entities/company.entities";
+
+// import companyEntity from "./models/entities/company.entities"
 
 
 dotenv.config()
 
 const app: Express = express()
-const port = endpointsConfig.Port
+const port = process.env.PORT
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
@@ -145,6 +147,27 @@ app.get("/countries", async (req: Request, res: Response) => {
         handleResponse(res, status, status.toString(), null, "Internal Server Error")
     }
 
+})
+
+app.post('/companies', (req: Request, res: Response) => {
+    const { company_name, telephone_number, is_active, address } = req.body
+
+    const newCompany = new Company({
+        company_name: company_name,
+        telephone_number: telephone_number,
+        is_active: is_active,
+        address: address
+    })
+
+    newCompany.save().then((company) => {
+        res.status(201).json({
+            data: company
+        })
+    }).catch((err) => {
+        res.status(400).json({
+            err: err.message
+        })
+    })
 })
 
 
