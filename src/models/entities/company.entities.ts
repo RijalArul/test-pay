@@ -1,12 +1,12 @@
-import mongoose, { model } from "mongoose";
+import { model, Schema } from "mongoose";
 import Joi from "joi";
-const Schema = mongoose.Schema
 
 interface ICompany {
     company_name: string
     telephone_number: string
     is_active: boolean
     address: string
+    employees: any[]
 }
 
 
@@ -16,14 +16,14 @@ const CompanySchema = new Schema<ICompany>({
         type: String,
         required: true,
         unique: true,
-        minLength: 3,
-        maxLength: 50
+        minlength: 3,
+        maxlength: 50
     },
     telephone_number: {
         type: String,
         default: null,
-        minLength: 8,
-        maxLength: 16
+        minlength: 8,
+        maxlength: 16
     },
     is_active: {
         type: Boolean,
@@ -32,10 +32,14 @@ const CompanySchema = new Schema<ICompany>({
     },
     address: {
         type: String,
-        minLength: 10,
-        maxLength: 50,
+        minlength: 10,
+        maxlength: 50,
         default: null
-    }
+    },
+    employees: [{
+        type: Schema.Types.ObjectId,
+        ref: "Employee"
+    }]
 }, { collection: 'companies' })
 
 CompanySchema.methods.joiValidate = function (obj: any) {

@@ -4,8 +4,7 @@ import Joi from 'joi';
 import axios from 'axios'
 import { connectDB } from "./db/db";
 import { Company } from "./models/entities/company.entities";
-
-// import companyEntity from "./models/entities/company.entities"
+import { Employee } from "./models/entities/employee.entities"
 
 
 dotenv.config()
@@ -168,6 +167,31 @@ app.post('/companies', (req: Request, res: Response) => {
             err: err.message
         })
     })
+})
+
+app.post('/companies/:company_id/employees', (req: Request, res: Response) => {
+    const { company_id } = req.params
+    const { name, email, phone_number, job_title } = req.body
+
+    const newEmployee = new Employee({
+        name: name,
+        email: email,
+        phone_number: phone_number,
+        job_title: job_title
+    })
+
+    newEmployee.company_id = company_id
+
+    newEmployee.save().then((employee) => {
+        res.status(201).json({
+            "data": employee
+        })
+    }).catch((err) => {
+        res.status(400).json({
+            "err": err.message
+        })
+    })
+
 })
 
 
