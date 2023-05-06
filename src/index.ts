@@ -1,15 +1,20 @@
 import express, { Express, Request, Response } from "express";
 import * as dotenv from 'dotenv'
 import Joi from 'joi';
+import axios from 'axios'
+import endpointsConfig from "./endpoints.config";
+import { connectDB } from "./db/db";
 
 
 dotenv.config()
 
 const app: Express = express()
-const port = process.env.PORT
+const port = endpointsConfig.Port
 
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
+
+connectDB()
 
 interface ResponseDTO {
     status: number
@@ -18,13 +23,34 @@ interface ResponseDTO {
     message: string
 }
 
+interface CountryData {
+    name: string
+    region: string
+    timezones: any[]
+}
+
 const fiboSchema = Joi.object({
-    n: Joi.number().integer().min(2)
+    n: Joi.number().integer().min(2).messages({
+        'number.base': `"n" should be a type of 'text'`,
+        'number.empty': `"n" cannot be an empty field`,
+        'number.min': `"n" should have a minimum length of {#limit}`,
+        'any.required': `"n" is a required field`
+    })
 })
 
 const combSchema = Joi.object({
-    n: Joi.number().integer().min(3),
-    r: Joi.number().integer().min(2)
+    n: Joi.number().integer().min(3).messages({
+        'number.base': `"n" should be a type of 'text'`,
+        'number.empty': `"n" cannot be an empty field`,
+        'number.min': `"n" should have a minimum length of {#limit}`,
+        'any.required': `"n" is a required field`
+    }),
+    r: Joi.number().integer().min(2).messages({
+        'number.base': `"r" should be a type of 'text'`,
+        'number.empty': `"r" cannot be an empty field`,
+        'number.min': `"r" should have a minimum length of {#limit}`,
+        'any.required': `"r" is a required field`
+    })
 })
 
 function handleResponse(res: Response, status: number, code: string, data: any, message: string): Response {
@@ -73,7 +99,7 @@ app.post("/fibonacci", (req: Request, res: Response) => {
         fibo[i] = (fibo[i - 2] + fibo[i - 1])
     }
     status = 200
-    handleResponse(res, status, status.toString(), fibo, "Success Fibonacci")
+    handleResponse(res, status, status.toString(), fibo.toString(), "Success Fibonacci")
 })
 
 app.post("/combination", (req: Request, res: Response) => {
@@ -90,6 +116,36 @@ app.post("/combination", (req: Request, res: Response) => {
     handleResponse(res, status, status.toString(), combination(n, r), "Success Combination")
 })
 
+app.get("/countries", async (req: Request, res: Response) => {
+    let status: number = 200
+    try {
+        const resp = await axios({
+            method: "GET",
+            url: "https://gist.githubusercontent.com/herysepty/ba286b815417363bfbcc472a5197edd0/raw/aed8ce8f5154208f9fe7f7b04195e05de5f81fda/coutries.json",
+        })
+
+        const { data } = resp
+
+        let bodyCountry: CountryData[] = []
+        for (let i = 0; i < data.length; i++) {
+            let newCountry: CountryData = {
+                name: data[i].name,
+                region: data[i].region,
+                timezones: data[i].timezones
+            }
+
+            bodyCountry.push(newCountry)
+        }
+
+        status = 200
+
+        handleResponse(res, status, status.toString(), bodyCountry, "Success Countries")
+    } catch (err) {
+        status = 500
+        handleResponse(res, status, status.toString(), null, "Internal Server Error")
+    }
+
+})
 
 
 app.listen(port, () => {
