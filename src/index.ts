@@ -5,6 +5,8 @@ import axios from 'axios'
 import { connectDB } from "./db/db";
 import { Company } from "./models/entities/company.entities";
 import { Employee } from "./models/entities/employee.entities"
+import { handleResponse } from "./helpers/response.api";
+import indexRoutes from "./routes/index.routes"
 
 
 dotenv.config()
@@ -17,12 +19,7 @@ app.use(express.json())
 
 connectDB()
 
-interface ResponseDTO {
-    status: number
-    code: string
-    data: any
-    message: string
-}
+
 
 interface CountryData {
     name: string
@@ -54,15 +51,7 @@ const combSchema = Joi.object({
     })
 })
 
-function handleResponse(res: Response, status: number, code: string, data: any, message: string): Response {
-    const body: ResponseDTO = {
-        status,
-        code,
-        data,
-        message
-    }
-    return res.status(status).json(body)
-}
+
 
 function combination(n: number, r: number): number {
     let nr: number = n - r
@@ -148,51 +137,10 @@ app.get("/countries", async (req: Request, res: Response) => {
 
 })
 
-app.post('/companies', (req: Request, res: Response) => {
-    const { company_name, telephone_number, is_active, address } = req.body
 
-    const newCompany = new Company({
-        company_name: company_name,
-        telephone_number: telephone_number,
-        is_active: is_active,
-        address: address
-    })
+app.use("/", indexRoutes)
 
-    newCompany.save().then((company) => {
-        res.status(201).json({
-            data: company
-        })
-    }).catch((err) => {
-        res.status(400).json({
-            err: err.message
-        })
-    })
-})
-
-app.post('/companies/:company_id/employees', (req: Request, res: Response) => {
-    const { company_id } = req.params
-    const { name, email, phone_number, job_title } = req.body
-
-    const newEmployee = new Employee({
-        name: name,
-        email: email,
-        phone_number: phone_number,
-        job_title: job_title
-    })
-
-    newEmployee.company_id = company_id
-
-    newEmployee.save().then((employee) => {
-        res.status(201).json({
-            "data": employee
-        })
-    }).catch((err) => {
-        res.status(400).json({
-            "err": err.message
-        })
-    })
-
-})
+app.post('/companies/:company_id/employees',)
 
 
 app.listen(port, () => {

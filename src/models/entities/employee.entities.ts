@@ -1,18 +1,5 @@
 import { ObjectId, Schema, model } from "mongoose";
-
-enum EmployeeJobTitle {
-    director = "director",
-    manager = "manager",
-    staff = "staff"
-}
-
-interface IEmployee {
-    name: string
-    email: string
-    phone_number: string
-    job_title: EmployeeJobTitle
-    company_id: any
-}
+import { EmployeeJobTitle, IEmployee } from "../dtos/employee.dtos";
 
 const EmployeeSchema = new Schema<IEmployee>({
     name: {

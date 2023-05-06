@@ -1,13 +1,6 @@
 import { model, Schema } from "mongoose";
 import Joi from "joi";
-
-interface ICompany {
-    company_name: string
-    telephone_number: string
-    is_active: boolean
-    address: string
-    employees: any[]
-}
+import { ICompany } from "../dtos/company.dtos";
 
 
 
